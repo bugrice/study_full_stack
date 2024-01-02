@@ -6,7 +6,7 @@ const pool = mysql.createPool({
   host: "localhost",
   user: "sbsst",
   password: "sbs123414",
-  database: "wise_saying",
+  database: "todo",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -16,59 +16,21 @@ const app = express();
 app.use(express.json());
 const port = 3000;
 
-const wiseSayings = [
-  {
-    content: "나는 의적이다.",
-    author: "홍길동",
-  },
-  {
-    content: "나는 산적이다.",
-    author: "임꺽정",
-  },
-];
-
 // 쿼리 실행문.. pool query 에는 await 을 붙이고 함수에 await을 붙임.
-app.get("/wise-sayings", async (req, res) => {
-  const [rows] = await pool.query("SELECT * FROM wise_saying ORDER BY id DESC");
+app.get("/todo", async (req, res) => {
+  const [rows] = await pool.query("SELECT * FROM task ORDER BY id DESC");
 
   res.json(rows);
 });
-
-app.post("/wise-sayings", async (req, res) => {
-    const { author, content } = req.body;
   
-    if( !author ){
-        res.status(400).json({
-            msg: "author required"
-        });
-        return;
-    }
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
 
-    if( !content ){
-        res.status(400).json({
-            msg: "content required"
-        });
-        return;
-    }
-
-    const [rs] = await pool.query(
-        `
-        INSERT INTO wise_saying
-        SET reg_date = NOW(),
-        content = ?,
-        author = ?
-        `,
-        [content, author]
-        );
-    
-    res.status(201).json({
-        id: rs.insertId,
-    });
-  });
-
-app.get("/wise-sayings/:id", async (req, res) => {
+// task 데이터의 아이디 검색
+app.get("/todo/:id", async (req, res) => {
     const { id }  = req.params;
-    const [rows] = await pool.query("SELECT * FROM wise_saying WHERE id = ?",[
+    const [rows] = await pool.query("SELECT * FROM task WHERE id = ?",[
         id,
     ]);
   
@@ -80,10 +42,46 @@ app.get("/wise-sayings/:id", async (req, res) => {
     res.json(rows[0]);
   });
 
-  app.delete("/wise-sayings/:id", async (req, res) => {
+  // task 테이블에 데이터 추가
+  app.post("/todo", async (req, res) => {
+    const { title, description } = req.body;
+  
+    if( !title ){
+        res.status(400).json({
+            msg: "title required"
+        });
+        return;
+    }
+
+    if( !description ){
+        res.status(400).json({
+            msg: "description required"
+        });
+        return;
+    }
+
+    const [rs] = await pool.query(
+        `
+        INSERT INTO task
+        SET user_id = 1,
+        title = ?,
+        description = ?,
+        is_completed = FALSE,
+        created_date = Now(),
+        updated_date = Now()
+        `,
+        [title, description]
+        );
+    
+    res.status(201).json({
+        id: rs.insertId,
+    });
+  });
+
+  app.delete("/todo/:id", async (req, res) => {
     const { id } = req.params;
   
-    const [rows] = await pool.query("SELECT * FROM wise_saying WHERE id = ?", [
+    const [rows] = await pool.query("SELECT * FROM task WHERE id = ?", [
       id,
     ]);
   
@@ -94,7 +92,7 @@ app.get("/wise-sayings/:id", async (req, res) => {
   
     const [rs] = await pool.query(
       `
-      DELETE FROM wise_saying
+      DELETE FROM task
       WHERE id = ?
       `,
       [id]
@@ -105,13 +103,12 @@ app.get("/wise-sayings/:id", async (req, res) => {
     });
   });
   
-
-  app.patch("/wise-sayings/:id", async (req, res) => {
+  app.patch("/todo/:id", async (req, res) => {
     const { id } = req.params;
   
-    const { author, content } = req.body;
+    const { description, is_completed } = req.body;
   
-    const [rows] = await pool.query("SELECT * FROM wise_saying WHERE id = ?", [
+    const [rows] = await pool.query("SELECT * FROM task WHERE id = ?", [
       id,
     ]);
   
@@ -120,37 +117,34 @@ app.get("/wise-sayings/:id", async (req, res) => {
       return;
     }
   
-    if (!author) {
+    if (!description) {
       res.status(400).json({
-        msg: "author required",
+        msg: "description required",
       });
       return;
     }
   
-    if (!content) {
+    if (!is_completed) {
       res.status(400).json({
-        msg: "content required",
+        msg: "is_completed required",
       });
       return;
     }
   
     const [rs] = await pool.query(
       `
-      UPDATE wise_saying
-      SET content = ?,
-      author = ?
+      UPDATE task
+      SET description = ?,
+      is_completed = ?,
+      updated_date = NOW()
       WHERE id = ?
       `,
-      [content, author, id]
+      [description, is_completed, id]
     );
   
     res.status(200).json({
       id,
-      author,
-      content,
+      description,
+      is_completed,
     });
-  });
-  
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
   });
