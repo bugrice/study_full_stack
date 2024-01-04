@@ -48,6 +48,7 @@ app.get("/todo/:id", async (req, res) => {
   
     if( !title ){
         res.status(400).json({
+          resultCode: "F-1",
             msg: "title required"
         });
         return;
@@ -55,6 +56,7 @@ app.get("/todo/:id", async (req, res) => {
 
     if( !description ){
         res.status(400).json({
+          resultCode: "F-1",
             msg: "description required"
         });
         return;
@@ -122,6 +124,7 @@ app.get("/todo/:id", async (req, res) => {
   
     if (!description) {
       res.status(400).json({
+        resultCode: "F-1",
         msg: "description required",
       });
       return;
@@ -129,6 +132,7 @@ app.get("/todo/:id", async (req, res) => {
   
     if (!is_completed) {
       res.status(400).json({
+        resultCode: "F-1",
         msg: "is_completed required",
       });
       return;
