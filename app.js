@@ -74,7 +74,9 @@ app.get("/todo/:id", async (req, res) => {
         );
     
     res.status(201).json({
-        id: rs.insertId,
+        resultCode: "S-1",
+        msg: `${rs.insertId}번 할일을 생성하였습니다.`,
+        data: rs
     });
   });
 
@@ -99,7 +101,8 @@ app.get("/todo/:id", async (req, res) => {
     );
   
     res.status(200).json({
-      id,
+      resultCode: "S-1",
+      msg: `${id}번 할일을 삭제하였습니다.`
     });
   });
   
@@ -143,8 +146,8 @@ app.get("/todo/:id", async (req, res) => {
     );
   
     res.status(200).json({
-      id,
-      description,
-      is_completed,
+      resultCode: "S-1",
+      msg: "성공",
+      data: rs,
     });
   });
