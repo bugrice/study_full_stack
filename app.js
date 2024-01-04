@@ -4,8 +4,8 @@ import mysql from "mysql2/promise";
 //db 접속 정보를 적는 코드..
 const pool = mysql.createPool({
   host: "localhost",
-  user: "sbsst",
-  password: "sbs123414",
+  user: "root",
+  password: "",
   database: "todo",
   waitForConnections: true,
   connectionLimit: 10,
