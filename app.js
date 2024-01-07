@@ -52,6 +52,56 @@ app.get("/todo/:id", async (req, res) => {
     res.json(rows[0]);
   });
 
+// 조회
+app.get("/:user_id/todo", async (req, res) => {
+  const { user_id } = req.params;
+
+  const [rows] = await pool.query(
+    `
+    SELECT *
+    FROM task
+    WHERE user_id = ?
+    ORDER BY id DESC
+    `,
+    [user_id]
+  );
+
+  res.json({
+    resultCode: "S-1",
+    msg: "성공",
+    data: rows,
+  });
+});
+
+  // 단건조회
+  app.get("/:user_id/todo/:id", async (req, res) => {
+    const { user_id, id } = req.params;
+    const [[todoRow]] = await pool.query(
+      `
+      SELECT *
+      FROM task
+      WHERE user_id = ?
+      AND id = ?
+      `,
+      [user_id, id]
+    );
+
+    if (todoRow === undefined) {
+      res.status(404).json({
+        resultCode: "F-1",
+        msg: "실패",
+      });
+      return;
+    }
+
+    res.json({
+      resultCode: "S-1",
+      msg: "성공",
+      data: todoRow,
+    });
+  });
+
+
   // task 테이블에 데이터 추가
   app.post("/todo", async (req, res) => {
     const { title, description } = req.body;
@@ -92,6 +142,7 @@ app.get("/todo/:id", async (req, res) => {
     });
   });
 
+  //삭제
   app.delete("/todo/:id", async (req, res) => {
     const { id } = req.params;
   
@@ -118,6 +169,7 @@ app.get("/todo/:id", async (req, res) => {
     });
   });
   
+  //수정
   app.patch("/todo/:id", async (req, res) => {
     const { id } = req.params;
   
