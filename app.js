@@ -1,5 +1,6 @@
 import express from "express";
 import mysql from "mysql2/promise";
+import cors from "cors";
 
 //db 접속 정보를 적는 코드..
 const pool = mysql.createPool({
@@ -13,7 +14,16 @@ const pool = mysql.createPool({
 });
 
 const app = express();
+
+const corsOptions = {
+  origin :"https://cdpn.io",
+  optionSuccessStatus: 200,
+};
+
+
 app.use(express.json());
+app.use(cors(corsOptions));
+
 const port = 3000;
 
 // 쿼리 실행문.. pool query 에는 await 을 붙이고 함수에 await을 붙임.
